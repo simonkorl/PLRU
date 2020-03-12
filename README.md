@@ -27,8 +27,8 @@ make
 make update
 ```
 
-运行时，将数据文件放于根目录下的 `trace` 文件夹中，执行以下指令即可：
+运行时，需要手动输入参数指定 trace 文件的名称，格式如下：
 
 ```sh
-make run
+./bin/CacheSim -i xxx.txt
 ```
