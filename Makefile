@@ -1,5 +1,6 @@
 build: clean
-	cmake -B build
+	mkdir build
+	cd build && cmake ..
 	make -C build
 
 update:
