@@ -17,7 +17,8 @@ const char OPERATION_WRITE = 's';
 
 #include "map"
 #include<iostream>
-#include<vector>
+#include <vector>
+#include <deque>
 #include <assert.h>
 #include <list>
 #include <unordered_map>
@@ -30,7 +31,9 @@ enum cache_swap_style {
     CACHE_SWAP_SRRIP,
     CACHE_SWAP_SRRIP_FP,
     CACHE_SWAP_BRRIP,
-    CACHE_SWAP_DRRIP
+    CACHE_SWAP_DRRIP,
+   // CACHE_SWAP_LIRS
+    CACHE_SWAP_PLRU
 };
 
 class Cache_Line {
@@ -40,6 +43,13 @@ public:
     _u32 LRU;
     _u32 RRPV;
     _u32 FRU;
+    _u32 PLRU;
+    _u8 P;
+    _u32 Q;
+    //_u32 R;
+    // _u8 IS_LIR; //代表块是否为LIR块，true为是，false为否
+    // _u32 S;
+    // _u32 Q;
 };
 
 class CacheSim {
@@ -88,6 +98,20 @@ public:
     /** DRRIP算法中的single policy selection (PSEL) counter*/
     long long PSEL;
     int cur_win_replace_policy;
+
+    /**LIRS算法中LIR块最大的个数*/
+    int Llirs;
+    /**LIRS算法中HIR块最大的个数*/
+    int Lhirs;
+
+    _u32 MAX_QUEUE_SIZE;
+    _u32 MIN_QUEUE_SIZE;
+
+    //std::vector<_u32>* stacks;
+    //std::deque<_u32>* queues;
+
+    _u32 get_lirs_num(_u64 set_base, std::vector<_u32>& stack);
+    void lirs_stack_prune(_u64 set_base, std::vector<_u32>& stack);
 
     /** 写miss时，将数据读入cache */
     int write_allocation;
