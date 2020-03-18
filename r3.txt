@@ -1,0 +1,111 @@
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:RAND
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3147533/16194948         hit/miss rate: 16.272644%/83.727356%
+read hit count in cache 1726530 miss count in cache 11395415
+write hit count in cache 1421003        miss count in cache 4799533
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9653GB
+Cache --> Memory:       328.9922MB
+cache sum:      1.2866GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:LRU
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3576378/15766103         hit/miss rate: 18.489758%/81.510242%
+read hit count in cache 1923106 miss count in cache 11198839
+write hit count in cache 1653272        miss count in cache 4567264
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9397GB
+Cache --> Memory:       322.5236MB
+cache sum:      1.2547GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:FRU
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3145547/16196934         hit/miss rate: 16.262376%/83.737624%
+read hit count in cache 2322946 miss count in cache 10798999
+write hit count in cache 822601 miss count in cache 5397935
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9654GB
+Cache --> Memory:       329.0018MB
+cache sum:      1.2867GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:SRRIP  3
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3639166/15703315         hit/miss rate: 18.814370%/81.185630%
+read hit count in cache 2110081 miss count in cache 11011864
+write hit count in cache 1529085        miss count in cache 4691451
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9360GB
+Cache --> Memory:       317.7845MB
+cache sum:      1.2463GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:SRRIP_FP
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3650685/15691796         hit/miss rate: 18.873923%/81.126077%
+read hit count in cache 2013497 miss count in cache 11108448
+write hit count in cache 1637188        miss count in cache 4583348
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9353GB
+Cache --> Memory:       320.6348MB
+cache sum:      1.2484GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:BRRIP
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3788341/15554140         hit/miss rate: 19.585600%/80.414400%
+read hit count in cache 2802051 miss count in cache 10319894
+write hit count in cache 986290 miss count in cache 5234246
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9271GB
+Cache --> Memory:       320.9967MB
+cache sum:      1.2406GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:DRRIP
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 3642830/15699651         hit/miss rate: 18.833313%/81.166687%
+read hit count in cache 2133421 miss count in cache 10988524
+write hit count in cache 1509409        miss count in cache 4711127
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9358GB
+Cache --> Memory:       317.8140MB
+cache sum:      1.2461GB
+
+========================================================
+cache_size: 4194304, cache_line_size:64, cache_set_size:2048, mapping_ways:32, cache_repl_policy:PLRU
+all r/w/sum: 13121945 6220536 19342481 
+all in cache r/w/sum: 13121945 6220536 19342481 
+read rate: 67.840030%   write rate: 32.159970%
+read rate in cache: 67.840030%  write rate in cache: 32.159970%
+Cache hit/miss: 4004753/15337728         hit/miss rate: 20.704443%/79.295557%
+read hit count in cache 2741417 miss count in cache 10380528
+write hit count in cache 1263336        miss count in cache 4957200
+Write through:  0       write allocation:       1
+Memory --> Cache:       0.9142GB
+Cache --> Memory:       305.6389MB
+cache sum:      1.2127GB
