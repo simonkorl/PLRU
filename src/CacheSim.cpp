@@ -112,29 +112,13 @@ void CacheSim::init(_u64 a_cache_size, _u64 a_cache_line_size, _u64 a_mapping_wa
     write_through = 0;
     write_allocation = 1;
 
-    // //用于LIRS算法
+    //用于PLRU算法
     Lhirs = int(0.01f * cache_mapping_ways);
     Lhirs = Lhirs == 0 ? 1 : Lhirs;
 
     Llirs = cache_mapping_ways - Lhirs;
-
-    //stacks = new std::vector<_u32>[cache_line_num];
-    // queues = new std::deque<_u32>[cache_line_num];
-
-    // MAX_QUEUE_SIZE = cache_mapping_ways;
-    // MIN_QUEUE_SIZE = Lhirs;
-    
 }
-// /**在栈底的LIR被删除后，通过该函数来清除栈底所有的HIR*/
-// void CacheSim::lirs_stack_prune(_u64 set_base, std::vector<_u32>& stack){
-//     for(auto iter = stack.begin(); iter != stack.end(); iter++){
-//         if(caches[set_base + *iter].IS_LIR){
-//             stack.erase(stack.begin(), iter);
-//             break;
-//         }
-//     }
-    
-// }
+
 /**顶部的初始化放在最一开始，如果中途需要对tick_count进行清零和caches的清空，执行此。*/
 void CacheSim::re_init() {
     tick_count = 0;
@@ -171,13 +155,7 @@ int CacheSim::cache_get_free_line(_u64 set_base) {
     }
    return -1;
 }
-// _u32 CacheSim::get_lirs_num(_u64 set_base, std::vector<_u32>& stack){
-//     _u32 lir_count = 0;
-//     for(auto iter = stack.begin(); iter != stack.end(); ++iter){
-//          if(caches[set_base + *iter].IS_LIR) lir_count++;
-//     }
-//     return lir_count;
-// }
+
 /**Normal Cache命中，更新Cache状态*/
 void CacheSim::cache_hit(_u64 set_base, _u64 index, int a_swap_style) {
 
@@ -204,96 +182,48 @@ void CacheSim::cache_hit(_u64 set_base, _u64 index, int a_swap_style) {
                     break;
                 case CACHE_SWAP_PLRU:
                     int pcount = 0;
-                    int max_plru = 0;
+                    _u32 max_plru = 0;
                     int max_index = -1;
                     for(int i = 0;i < cache_mapping_ways; ++i){
-                        if(index != i && caches[set_base + i].P == true){
-                            caches[set_base + i].PLRU ++;
-                            if(caches[set_base + i].PLRU > max_plru){
-                                max_plru = caches[set_base + i].PLRU;
+                        if(index != i && ISPRIV(caches[set_base + i].P)){
+                            if(PROPERTY(caches[set_base + i].P) > max_plru){
+                                max_plru = PROPERTY(caches[set_base + i].P);
                                 max_index = i;
                             }
                         }
-                        if(caches[set_base + i].P == true){
+                        if(ISPRIV(caches[set_base + i].P)){
                             pcount ++;
                         }
                     }
-                    if(caches[set_base + index].P == false){
-                        caches[set_base + index].P = true;
-                        caches[set_base + index].PLRU = 0;
-                        caches[set_base + index].Q = 0;
+                    if(!ISPRIV(caches[set_base + index].P)){
+                        _u32 qpos = PROPERTY(caches[set_base + index].P);
+                        caches[set_base + index].P = STACK_TOP;
+                        for(int i = 0;i < cache_mapping_ways; ++i){
+                            if(!ISPRIV(caches[set_base + i].P) && caches[set_base + i].P > qpos){
+                                caches[set_base + i].P--;
+                            }else if(ISPRIV(caches[set_base + i].P)){
+                                caches[set_base + i].P++;
+                            }
+                        }
+                        // if there are too many lirs then remove the last one
                         if(pcount == Llirs){
-                            caches[set_base + max_index].Q = 1;
-                            caches[set_base + max_index].P = false;
-                            caches[set_base + max_index].PLRU = UINT32_MAX;
+                            caches[set_base + max_index].P = QUEUE_TAIL;
                             for(int i = 0;i < cache_mapping_ways; ++i){
-                                if(i != max_index && caches[set_base + i].Q > 0){
-                                    caches[set_base + i].Q++;
+                                if(!ISPRIV(caches[set_base + i].P)){
+                                    caches[set_base + i].P++;
                                 }
                             } 
                         }
                     }else{
-                        caches[set_base + index].PLRU = 0;
-                        caches[set_base + index].Q = 0;
+                        _u32 s_pos = PROPERTY(caches[set_base + index].P);
+                        caches[set_base + index].P = STACK_TOP;
+                        for(int i = 0;i < cache_mapping_ways; ++i){
+                            if(ISPRIV(caches[set_base + i].P) && PROPERTY(caches[set_base + i].P) < s_pos){
+                                caches[set_base + i].P++;
+                            }
+                        } 
                     }
                     break;
-                    
-                // case CACHE_SWAP_LIRS:
-                //     Cache_Line& c_cache = caches[set_base + index];
-                //     std::vector<_u32>& c_stack = stacks[set_base];
-                //     if(c_cache.IS_LIR){
-                //         // 如果是LIR，将其移动至栈顶，并且裁剪
-                //         for(auto iter = c_stack.begin(); iter != c_stack.end(); ++iter){
-                //             if(*iter == index){
-                //                 c_stack.erase(iter);
-                //             }else{
-                //                 caches[set_base + *iter].R++;
-                //             }
-                //         }
-                //         c_stack.push_back(index);
-                //         c_cache.R = 0;
-
-                //         lirs_stack_prune(set_base, c_stack);
-                //     }else{
-                //         auto c_queue = queues[set_base];
-                //         bool is_exist = false;
-                //         auto index_iter = c_stack.end();
-                //         // 遍历栈寻找当前块，并且将栈中其他元素的R值增加1
-                //         for(auto iter = c_stack.begin(); iter != c_stack.end(); ++iter){
-                //             if(*iter == index){
-                //                 is_exist = true;
-                //                 index_iter = iter;
-                //             }else{
-                //                 caches[set_base + *iter].R++;
-                //             }
-                //         }
-                //         // 如果在栈中有，则从栈中移动至栈顶，否则直接加入栈顶
-                //         if(is_exist){
-                //             c_stack.erase(index_iter);
-                //             c_stack.push_back(index);
-                //         }else{
-                //             c_stack.push_back(index);
-                //         }
-                //         c_cache.R = 0;
-                //         // 切换为LIR
-                //         c_cache.IS_LIR = true;
-                //         // 从队列中删除之
-                //         for(auto iter = c_queue.begin(); iter != c_queue.end(); ++iter){
-                //             if(*iter == index){
-                //                 c_queue.erase(iter);
-                //                 break;
-                //             }
-                //         }
-                //         // 如果此时LIR太多了，则把栈底的LIR转变为 HIR，并且加入队列
-                //         // 栈裁剪
-                //         if(get_lirs_num(set_base, c_stack) > Llirs){
-                //             auto flir = c_stack.erase(c_stack.begin());
-                //             caches[set_base + *flir].IS_LIR = false;
-                //             queues[set_base].push_back(*flir);
-                //             lirs_stack_prune(set_base, c_stack);
-                //         }
-                //     }
-                //     break;
         }
 }
 
@@ -321,86 +251,11 @@ void CacheSim::cache_insert(_u64 set_base, _u64 index, int a_swap_style) {
                     caches[set_base + index].RRPV = (rand_num > EPSILON)? SRRIP_2_M_1 : SRRIP_2_M_2;
                     break;
                 case CACHE_SWAP_PLRU:
-                    caches[set_base + index].Q = 1;
-                    caches[set_base + index].P = false;
-                    caches[set_base + index].PLRU = UINT32_MAX;
-                    for(int i = 0;i < cache_mapping_ways; ++i){
-                        if(i != index && caches[set_base + i].Q > 0){
-                            caches[set_base + i].Q++;
-                        }
-                    }
-                    // decay 算法
-                    int max_plru = 0;
-                    int max_index = -1;
-                    for(int i = 0;i < cache_mapping_ways; ++i){
-                        if(caches[set_base + i].P == true && caches[set_base + i].PLRU > max_plru){
-                            max_plru = caches[set_base + i].PLRU;
-                            max_index = i;
-                        }
-                    }
-                    if(max_plru > 100 * Lhirs){
-                        caches[set_base + max_index].Q = 1;
-                        caches[set_base + max_index].P = false;
-                        caches[set_base + max_index].PLRU = UINT32_MAX;
+                    caches[set_base + index].P = 0;
                         for(int i = 0;i < cache_mapping_ways; ++i){
-                            if(i != max_index && caches[set_base + i].Q > 0){
-                                caches[set_base + i].Q++;
-                            }
+                            caches[set_base + i].P++;
                         }
-                    }
                     break;
-                // case CACHE_SWAP_LIRS:
-                //     std::vector<_u32>& c_stack = stacks[set_base];
-                //     std::deque<_u32>& c_queue = queues[set_base];
-                //     Cache_Line c_cache = caches[set_base + index];
-                //     bool is_in_stack = false;
-                //     bool is_in_queue = false;
-                //     for(auto iter = c_stack.begin(); iter != c_stack.end(); ++iter){
-                //         if(*iter == index){
-                //             // 如果已经在栈中，则需要更新信息
-                //             // 将其移动至栈顶，并且增加其它元素的 R
-                //             c_stack.erase(iter);
-                //             c_stack.push_back(index);
-                //             c_cache.IS_LIR = false;
-                //             c_cache.R = 0;
-
-                //             is_in_stack = true;
-                //         } else{
-                //             caches[set_base + *iter].R ++;
-                //         }
-                //     }
-                //     for(auto iter = c_queue.begin(); iter != c_queue.end(); ++iter){
-                //         if(*iter == index){
-                //             // 如果已经在队列中，则将其移动至队尾
-                //             c_queue.erase(iter);
-                //             c_queue.push_back(index);
-
-                //             is_in_queue = true;
-                //             break;
-                //         }
-                //     }
-                //     if(!is_in_stack){
-                //         c_stack.push_back(index);
-                //         c_cache.IS_LIR = false;
-                //         c_cache.R = 0;
-                //     }
-                //     if(!is_in_queue){
-                //         c_queue.push_back(index);
-                //     }
-
-                //     // decay机制，如果栈底的若干个 LIR 间隔的不同数据太多，便将它们降级为 HIR
-                //     std::vector<_u32>::iterator decay_end = c_stack.end();
-                //     for(auto iter = c_stack.begin(); iter != c_stack.end(); ++iter){
-                //         if(caches[set_base + *iter].IS_LIR && caches[set_base + *iter].R >= 100 * c_queue.size()){
-                //             caches[set_base + *iter].IS_LIR = false;
-                //             queues[set_base].push_back(*iter);
-                //             decay_end = iter;
-                //         }
-                //     }
-                //     if(decay_end != c_stack.end()){
-                //         c_stack.erase(c_stack.begin(),++decay_end);
-                //     }
-                //     break;
         }
 }
 
@@ -463,37 +318,25 @@ int CacheSim::cache_find_victim(_u64 set_base , int a_swap_style, int hit_index)
             break;
         case CACHE_SWAP_PLRU:
             int max_index = -1;
-            int max_q = 0;
+            _u32 max_q = 0;
+            int last_empty_index = -1;
             for(int i = 0;i < cache_mapping_ways; ++i){
-                if(caches[set_base + i].Q > 0){
-                    if(caches[set_base + i].Q > max_q){
-                        max_index = i;
-                        max_q = caches[set_base + i].Q;
-                    }
+                if(!ISPRIV(caches[set_base + i].P) && PROPERTY(caches[set_base + i].P) > max_q){
+                    max_index = i;
+                    max_q = PROPERTY(caches[set_base + i].P);
+                }else if(!PROPERTY(caches[set_base + i].P)){
+                    last_empty_index = i;
                 }
             }
-            if(max_index != -1)
+            if(max_index != -1){
                 free_index = max_index;
-            else{
-                int max_plru = 0;
-                for(int i = 0;i < cache_mapping_ways; ++i){
-                    if(caches[set_base + i].PLRU > 0){
-                        if(caches[set_base + i].PLRU > max_plru){
-                            max_index = i;
-                            max_plru = caches[set_base + i].PLRU;
-                        }
-                    }
-                }
+            }   
+            else if(last_empty_index >= 0){
+                free_index = last_empty_index;
+            }else{
+                printf("error: Victim cannot be found in the queue and there is no empty cache block\n");
             }
-            free_index = max_index;
             break;
-        // case CACHE_SWAP_LIRS:
-        //     if(queues[set_base].size() > 0){
-        //         return queues[set_base].front();
-        //     } else{
-        //         printf("error: A victim is searched in an empty queue.\n");
-        //     }
-        //     break;
    }
 
    if (free_index >= 0) {

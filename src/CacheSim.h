@@ -35,7 +35,12 @@ enum cache_swap_style {
    // CACHE_SWAP_LIRS
     CACHE_SWAP_PLRU
 };
-
+#define ISPRIV(a) ((a & 0x80000000) > 0) // if this cache block a priviledge block
+#define ENABLE_PRIV(a)  (a |= 0x80000000) // enable priviledge bit
+#define DISABLE_PRIV(a) (a &= 0x7fffffff) // disable priviledge bit
+#define PROPERTY(P) (P & 0x7fffffff)
+#define STACK_TOP 0x80000000
+#define QUEUE_TAIL 0
 class Cache_Line {
 public:
     _u64 tag;
@@ -43,9 +48,9 @@ public:
     _u32 LRU;
     _u32 RRPV;
     _u32 FRU;
-    _u32 PLRU;
-    _u8 P;
-    _u32 Q;
+    //_u32 PLRU;
+    _u32 P;
+    //_u32 Q;
     //_u32 R;
     // _u8 IS_LIR; //代表块是否为LIR块，true为是，false为否
     // _u32 S;
@@ -107,11 +112,7 @@ public:
     _u32 MAX_QUEUE_SIZE;
     _u32 MIN_QUEUE_SIZE;
 
-    //std::vector<_u32>* stacks;
-    //std::deque<_u32>* queues;
-
-    _u32 get_lirs_num(_u64 set_base, std::vector<_u32>& stack);
-    void lirs_stack_prune(_u64 set_base, std::vector<_u32>& stack);
+    _u32 get_max_in_lines(_u64 set_base, _u32& max_property, _u32& max_index);
 
     /** 写miss时，将数据读入cache */
     int write_allocation;
