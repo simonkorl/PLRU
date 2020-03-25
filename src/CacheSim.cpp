@@ -199,7 +199,7 @@ void CacheSim::cache_hit(_u64 set_base, _u64 index, int a_swap_style) {
                         _u32 qpos = PROPERTY(caches[set_base + index].P);
                         caches[set_base + index].P = STACK_TOP;
                         for(int i = 0;i < cache_mapping_ways; ++i){
-                            if(!ISPRIV(caches[set_base + i].P) && caches[set_base + i].P > qpos){
+                            if(!ISPRIV(caches[set_base + i].P) && PROPERTY(caches[set_base + i].P) > qpos){
                                 caches[set_base + i].P--;
                             }else if(ISPRIV(caches[set_base + i].P)){
                                 caches[set_base + i].P++;
@@ -207,9 +207,9 @@ void CacheSim::cache_hit(_u64 set_base, _u64 index, int a_swap_style) {
                         }
                         // if there are too many lirs then remove the last one
                         if(pcount == Llirs){
-                            caches[set_base + max_index].P = QUEUE_TAIL;
+                            caches[set_base + max_index].P = QUEUE_TAIL + 1;
                             for(int i = 0;i < cache_mapping_ways; ++i){
-                                if(!ISPRIV(caches[set_base + i].P)){
+                                if(i != index && !ISPRIV(caches[set_base + i].P) && PROPERTY(caches[set_base + i].P)){
                                     caches[set_base + i].P++;
                                 }
                             } 
@@ -251,10 +251,34 @@ void CacheSim::cache_insert(_u64 set_base, _u64 index, int a_swap_style) {
                     caches[set_base + index].RRPV = (rand_num > EPSILON)? SRRIP_2_M_1 : SRRIP_2_M_2;
                     break;
                 case CACHE_SWAP_PLRU:
-                    caches[set_base + index].P = 0;
-                        for(int i = 0;i < cache_mapping_ways; ++i){
-                            caches[set_base + i].P++;
+                    int pcount = 0;
+                    _u32 max_plru = 0;
+                    int max_index = -1;
+                    for(int i = 0;i < cache_mapping_ways; ++i){
+                        if(index != i && ISPRIV(caches[set_base + i].P)){
+                            if(PROPERTY(caches[set_base + i].P) > max_plru){
+                                max_plru = PROPERTY(caches[set_base + i].P);
+                                max_index = i;
+                            }
                         }
+                        if(ISPRIV(caches[set_base + i].P)){
+                            pcount ++;
+                        }
+                    }
+
+                    caches[set_base + index].P = QUEUE_TAIL;
+                    for(int i = 0;i < cache_mapping_ways; ++i){
+                        caches[set_base + i].P++;
+                    }
+                    // decay algorithm
+                    if(max_index >= 0 && max_plru >= 100 * cache_mapping_ways){
+                        caches[set_base + max_index].P = QUEUE_TAIL + 1;
+                        for(int i = 0;i < cache_mapping_ways; ++i){
+                            if(i != index && !ISPRIV(caches[set_base + i].P) && PROPERTY(caches[set_base + i].P)){
+                                caches[set_base + i].P++;
+                            }
+                        }
+                    }
                     break;
         }
 }
