@@ -102,10 +102,10 @@ all r/w/sum: 13121945 6220536 19342481
 all in cache r/w/sum: 13121945 6220536 19342481 
 read rate: 67.840030%   write rate: 32.159970%
 read rate in cache: 67.840030%  write rate in cache: 32.159970%
-Cache hit/miss: 4004753/15337728         hit/miss rate: 20.704443%/79.295557%
-read hit count in cache 2741417 miss count in cache 10380528
-write hit count in cache 1263336        miss count in cache 4957200
+Cache hit/miss: 3783034/15559447         hit/miss rate: 19.558163%/80.441837%
+read hit count in cache 2610119 miss count in cache 10511826
+write hit count in cache 1172915        miss count in cache 5047621
 Write through:  0       write allocation:       1
-Memory --> Cache:       0.9142GB
-Cache --> Memory:       305.6389MB
-cache sum:      1.2127GB
+Memory --> Cache:       0.9274GB
+Cache --> Memory:       307.9550MB
+cache sum:      1.2282G
